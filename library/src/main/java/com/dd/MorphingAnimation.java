@@ -10,9 +10,12 @@ import android.widget.TextView;
 
 class MorphingAnimation {
 
-    private static final int ANIMATION_DURATION = 400;
+    public static final int DURATION_NORMAL = 400;
+    public static final int DURATION_INSTANT = 1;
 
     private OnAnimationEndListener mListener;
+
+    private int mDuration;
 
     private int mFromWidth;
     private int mToWidth;
@@ -26,12 +29,18 @@ class MorphingAnimation {
     private float mFromCornerRadius;
     private float mToCornerRadius;
 
+    private float mPadding;
+
     private TextView mView;
     private StrokeGradientDrawable mDrawable;
 
     public MorphingAnimation(TextView viewGroup, StrokeGradientDrawable drawable) {
         mView = viewGroup;
         mDrawable = drawable;
+    }
+
+    public void setDuration(int duration) {
+        mDuration = duration;
     }
 
     public void setListener(OnAnimationEndListener listener) {
@@ -70,6 +79,10 @@ class MorphingAnimation {
         mToCornerRadius = toCornerRadius;
     }
 
+    public void setPadding(float padding) {
+        mPadding = padding;
+    }
+
     public void start() {
         ValueAnimator widthAnimation = ValueAnimator.ofInt(mFromWidth, mToWidth);
         final GradientDrawable gradientDrawable = mDrawable.getGradientDrawable();
@@ -79,16 +92,20 @@ class MorphingAnimation {
                 Integer value = (Integer) animation.getAnimatedValue();
                 int leftOffset;
                 int rightOffset;
+                int padding;
 
-                if(mFromWidth > mToWidth) {
+                if (mFromWidth > mToWidth) {
                     leftOffset = (mFromWidth - value) / 2;
                     rightOffset = mFromWidth - leftOffset;
+                    padding = (int) (mPadding * animation.getAnimatedFraction());
                 } else {
                     leftOffset = (mToWidth - value) / 2;
                     rightOffset = mToWidth - leftOffset;
+                    padding = (int) (mPadding - mPadding * animation.getAnimatedFraction());
                 }
 
-                gradientDrawable.setBounds(leftOffset, 0, rightOffset, mView.getHeight());
+                gradientDrawable
+                        .setBounds(leftOffset + padding, padding, rightOffset - padding, mView.getHeight() - padding);
             }
         });
 
@@ -103,7 +120,7 @@ class MorphingAnimation {
                 ObjectAnimator.ofFloat(gradientDrawable, "cornerRadius", mFromCornerRadius, mToCornerRadius);
 
         AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.setDuration(ANIMATION_DURATION);
+        animatorSet.setDuration(mDuration);
         animatorSet.playTogether(widthAnimation, bgColorAnimation, strokeColorAnimation, cornerAnimation);
         animatorSet.addListener(new Animator.AnimatorListener() {
             @Override

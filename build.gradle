@@ -2,10 +2,10 @@
 
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:0.14.2'
     }
 }
 
@@ -18,7 +18,10 @@ allprojects {
     group = GROUP
 
     repositories {
-        mavenCentral()
+        jcenter()
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
     }
 }
 
